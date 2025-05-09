@@ -28,6 +28,7 @@ Il est possible de tester la communication avec les microservices `authenticatio
 - [authentication-service](https://raw.githubusercontent.com/palikcuiho/ECF3/refs/heads/main/server/Dockerfile-authentication-service)
 - [common-data-service](https://raw.githubusercontent.com/palikcuiho/ECF3/refs/heads/main/server/Dockerfile-common-data-service)
 - [payment-service](https://raw.githubusercontent.com/palikcuiho/ECF3/refs/heads/main/server/Dockerfile-payment-service)
+- [search-suggestions-service](https://raw.githubusercontent.com/palikcuiho/ECF3/refs/heads/main/server/Dockerfile-search-suggestions-service)
 
 ### Docker Compose
 

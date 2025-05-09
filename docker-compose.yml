@@ -26,8 +26,6 @@ services:
     image: mysql:latest
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: true
-    # ports:
-    #   - 3306:3306
     volumes:
       - authentication-service-mysql-volume:/var/lib/mysql
 
@@ -41,14 +39,7 @@ services:
       dockerfile: Dockerfile-common-data-service
     environment:
       PORT: ${COMMON_DATA_SERVICE_PORT}
-      # ACTIVE_PROFILE: dev
       DB_HOST: common-data-service-mysql-db
-      # DB_PORT: 3306
-      # DB_SCHEMA: ecommerce_app_database 
-      # DB_USER: mysqluser
-      # DB_PASS: mypass
-      # REDIS_PASSWORD: mypass
-      # REDIS_PORT: 6379
       REDIS_HOST: common-data-service-redis
     ports:
       - ${COMMON_DATA_SERVICE_PORT}:${COMMON_DATA_SERVICE_PORT}
@@ -62,8 +53,6 @@ services:
     restart: always
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: true
-    # ports:
-    #   - 3307:3306
     volumes:
       - common-data-service-mysql-volume:/var/lib/mysql
       
@@ -71,11 +60,7 @@ services:
     restart: always
     env_file: ".env"
     image: redis:latest
-    command: /bin/sh -c "redis-server --requirepass $$REDIS_HOST_PASSWORD"
-    environment:
-      REDIS_HOST_PASSWORD: mypass
-    # ports:
-    #   - 6379:6379
+    command: /bin/sh -c "redis-server --requirepass ${REDIS_PASSWORD}"
     volumes:
       - common-data-service-redis-volume:/data
 
@@ -89,6 +74,17 @@ services:
       PORT: ${PAYMENT_SERVICE_PORT}
     ports:
       - ${PAYMENT_SERVICE_PORT}:${PAYMENT_SERVICE_PORT}
+      
+ ## search-suggestions-service
+
+  search-suggestions-service:
+    build:
+      context: ./server
+      dockerfile: Dockerfile-search-suggestions-service
+    environment:
+      PORT: ${SEARCH_SUGGESTION_SERVICE_PORT}
+    ports:
+      - ${SEARCH_SUGGESTION_SERVICE_PORT}:${SEARCH_SUGGESTION_SERVICE_PORT}
 
 # Frontend
 

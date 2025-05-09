@@ -1,0 +1,13 @@
+FROM eclipse-temurin:24-jdk-noble AS builder 
+
+WORKDIR /home/app
+ADD search-suggestions-service /home/app/search-suggestions-service
+RUN cd search-suggestions-service && ./mvnw -Dmaven.test.skip=true clean package
+
+FROM eclipse-temurin:24-jre-noble
+
+WORKDIR /home/app
+EXPOSE 7000
+ENTRYPOINT ["java", "-jar", "search-suggestions-service.jar"]
+COPY --from=builder /home/app/search-suggestions-service/target/*.jar search-suggestions-service.jar
+
