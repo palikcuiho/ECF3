@@ -1,0 +1,112 @@
+name: ECF3
+
+services:
+# Backend
+
+  ## authentication-service
+
+  authentication-service:
+    env_file: ".env"
+    build:
+      context: ./server
+      dockerfile: Dockerfile-authentication-service
+    restart: always
+    environment:
+      PORT: ${AUTHENTICATION_SERVICE_PORT}
+      ACTIVE_PROFILE: dev
+      DB_HOST: authentication-service-mysql-db
+    ports:
+      - ${AUTHENTICATION_SERVICE_PORT}:${AUTHENTICATION_SERVICE_PORT}
+    depends_on:
+      - authentication-service-mysql-db
+
+  authentication-service-mysql-db:
+    env_file: ".env"
+    restart: always
+    image: mysql:latest
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: true
+    # ports:
+    #   - 3306:3306
+    volumes:
+      - authentication-service-mysql-volume:/var/lib/mysql
+
+## common-data-service
+
+  common-data-service:
+    env_file: ".env"
+    restart: always
+    build:
+      context: ./server
+      dockerfile: Dockerfile-common-data-service
+    environment:
+      PORT: ${COMMON_DATA_SERVICE_PORT}
+      # ACTIVE_PROFILE: dev
+      DB_HOST: common-data-service-mysql-db
+      # DB_PORT: 3306
+      # DB_SCHEMA: ecommerce_app_database 
+      # DB_USER: mysqluser
+      # DB_PASS: mypass
+      # REDIS_PASSWORD: mypass
+      # REDIS_PORT: 6379
+      REDIS_HOST: common-data-service-redis
+    ports:
+      - ${COMMON_DATA_SERVICE_PORT}:${COMMON_DATA_SERVICE_PORT}
+    depends_on:
+      - common-data-service-mysql-db
+      - common-data-service-redis
+
+  common-data-service-mysql-db:
+    env_file: ".env"
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: true
+    # ports:
+    #   - 3307:3306
+    volumes:
+      - common-data-service-mysql-volume:/var/lib/mysql
+      
+  common-data-service-redis:
+    restart: always
+    env_file: ".env"
+    image: redis:latest
+    command: /bin/sh -c "redis-server --requirepass $$REDIS_HOST_PASSWORD"
+    environment:
+      REDIS_HOST_PASSWORD: mypass
+    # ports:
+    #   - 6379:6379
+    volumes:
+      - common-data-service-redis-volume:/data
+
+## payment-service
+
+  payment-service:
+    build:
+      context: ./server
+      dockerfile: Dockerfile-payment-service
+    environment:
+      PORT: ${PAYMENT_SERVICE_PORT}
+    ports:
+      - ${PAYMENT_SERVICE_PORT}:${PAYMENT_SERVICE_PORT}
+
+# Frontend
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile-client
+    ports:
+      - ${REACT_APP_PORT}:${REACT_APP_PORT}
+    env_file: ".env"
+    environment:
+      PORT: ${REACT_APP_PORT}
+    depends_on:
+      - payment-service
+      - common-data-service
+      - authentication-service
+
+volumes:
+   common-data-service-mysql-volume:
+   common-data-service-redis-volume:
+   authentication-service-mysql-volume:

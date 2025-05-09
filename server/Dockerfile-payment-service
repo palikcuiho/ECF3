@@ -1,0 +1,13 @@
+FROM eclipse-temurin:11-jdk-noble AS builder
+
+WORKDIR /home/app
+ADD payment-service /home/app/payment-service
+RUN cd payment-service && ./mvnw -Dmaven.test.skip=true clean package
+
+FROM eclipse-temurin:11-jre-noble
+
+WORKDIR /home/app
+EXPOSE 9050
+ENTRYPOINT ["java", "-jar", "payment-service.jar"]
+COPY --from=builder /home/app/payment-service/target/*.jar payment-service.jar
+

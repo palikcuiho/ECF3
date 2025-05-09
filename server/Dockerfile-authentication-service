@@ -1,0 +1,13 @@
+FROM eclipse-temurin:11-jdk-noble AS builder 
+
+WORKDIR /home/app
+ADD authentication-service /home/app/authentication-service
+RUN cd authentication-service && ./mvnw -Dmaven.test.skip=true clean package
+
+FROM eclipse-temurin:11-jre-noble
+
+WORKDIR /home/app
+EXPOSE 7000
+ENTRYPOINT ["java", "-jar", "authentication-service.jar"]
+COPY --from=builder /home/app/authentication-service/target/*.jar authentication-service.jar
+

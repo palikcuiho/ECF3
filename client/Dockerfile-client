@@ -1,0 +1,16 @@
+FROM node:14-bullseye AS builder
+WORKDIR /app
+RUN apt update && apt install python2 -y
+COPY package.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+FROM node:14-alpine
+WORKDIR /app
+COPY package.json ./
+RUN npm install --production
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/server.js ./
+EXPOSE 3000
+CMD ["node", "server.js"]

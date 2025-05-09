@@ -1,0 +1,13 @@
+FROM eclipse-temurin:11-jdk-noble AS builder
+
+WORKDIR /home/app
+ADD common-data-service /home/app/common-data-service
+RUN cd common-data-service && ./mvnw -Dmaven.test.skip=true clean package
+
+FROM eclipse-temurin:11-jre-noble
+
+WORKDIR /home/app
+EXPOSE 9000
+ENTRYPOINT ["java", "-jar", "common-data-service.jar"]
+COPY --from=builder /home/app/common-data-service/target/*.jar common-data-service.jar
+
